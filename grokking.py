@@ -1,9 +1,8 @@
-# %%
 import torch
 import tqdm
 from torch.nn import functional as F
 torch.manual_seed(1)
-# %%
+
 P = 53
 TRAIN_FRAC = .8
 EPOCHS = 1000
@@ -30,23 +29,18 @@ class Model(torch.nn.Module):
     emb = self.emb(x).view(-1, 2*self.hidden_dim)
     return self.decoder(emb)
 
-# %%
 
 # data is X = [num1, num2], Y = num1 + num2 % P
 all_nums = torch.arange(P)
 X = torch.cartesian_prod(all_nums, all_nums)
 Y = X.sum(axis=1) % P
-# Y mean 0 std 1
-# %%
-# train and tests with randperm
+
 perm = torch.randperm(X.shape[0])
 train_size = int(X.shape[0] * TRAIN_FRAC)
 train_idx = perm[:train_size]
 test_idx = perm[train_size:]
 X_train, Y_train = X[train_idx], Y[train_idx]
 X_test, Y_test = X[test_idx], Y[test_idx]
-
-# %%
 
 model = Model(HIDDEN_DIM, P)
 optimizer = torch.optim.Adam(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
@@ -63,4 +57,3 @@ for epoch in bar:
     test_loss = F.cross_entropy(Yhat_test, Y_test)
     test_acc = Yhat_test.argmax(axis=1).eq(Y_test).float().mean()
   bar.set_description(f"loss: {loss.item():.3e}, test_loss: {test_loss.item():.3e}, acc: {acc.item():.3f}, test_acc: {test_acc.item():.3f}")
-# %%
